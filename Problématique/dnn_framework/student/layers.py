@@ -8,8 +8,8 @@ class FullyConnectedLayer(Layer):
 
     def __init__(self, input_count, output_count):
         super().__init__()
-        self.W = np.random.normal(0,2/(input_count+output_count),(output_count, input_count))
-        self.B = np.random.normal(0,2/output_count,output_count)
+        self.W = np.random.normal(0,4/(input_count+output_count),(output_count, input_count))
+        self.B = np.zeros(output_count)
 
     def get_parameters(self):
         return {

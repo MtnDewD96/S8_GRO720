@@ -15,18 +15,23 @@ class CrossEntropyLoss(Loss):
         :return A tuple containing the loss and the gradient with respect to the input (loss, input_grad)
         """
 
-        # Could be optimized with softmax exponential being cancelled by log
+        # Softmax of every input to get probability distribution + log probability
         s = softmax(x)
+        log_prob = np.log(s + 1e-5)
+        # We only keep the probabilities of the non-zero targets (we find the ones in the one-hot encoding)
+        # This arises from the cross entropy formula y_j*log(yhat_j), where y_j will be 1 for a single class and 0 for the rest
         target_arange = np.arange(len(target))
-        log_prob = np.log(s)
         target_log_prob = log_prob[target_arange, target]
+        # Get negative mean of all elements in batch
         loss = -np.mean(target_log_prob)
 
+        # Create one-hot vector for target classes
         oh_target = np.zeros_like(x)
         oh_target[target_arange, target] = 1
 
-        # Not the equation from the student guide?!?! Why?!?! should be -(target/s)
-        grad_loss = (s - oh_target) /s.shape[0]
+        # Compute gradient using softmax
+        grad_loss = (s - oh_target)/s.shape[0]
+
         return loss, grad_loss
 
 
@@ -35,7 +40,10 @@ def softmax(x):
     :param x: The input tensor (shape: (N, C))
     :return The softmax of x
     """
-    e_x = np.exp(x)
+
+    # Max value to avoid numerical instability
+    mx = np.max(x,axis=1,keepdims=True)
+    e_x = np.exp(x-mx)
     return e_x/np.sum(e_x,axis=1, keepdims=True)
 
 
